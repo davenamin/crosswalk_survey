@@ -30,18 +30,16 @@
 
   $.getJSON("/geojson").done(function (data) {
     L.geoJSON(data, {
-      pointToLayer: function (gjson, latlng) {
-        markerstyle = function (feature) {
-          switch (feature.properties.marking) {
-            case "unmarked": return { color: "Blue" };
-            case "lines": return { color: "Green" };
-            case "stripes__zebra": return { color: "DarkOrange" };
-            default: return { color: "Grey" };
-          }
-        }(gjson);
-
-        return L.circleMarker(latlng, markerstyle).bindPopup(
-          "<pre>" + JSON.stringify(gjson.properties, null, 2) + "</pre>");
+      style: function (feature) {
+        switch (feature.properties.marking) {
+          case "unmarked": return { color: "Blue" };
+          case "lines": return { color: "Green" };
+          case "stripes__zebra": return { color: "DarkOrange" };
+          default: return { color: "Grey" };
+        }
+      },
+      onEachFeature: function (feature, layer) {
+        layer.bindPopup("<pre>" + JSON.stringify(feature.properties, null, 2) + "</pre>");
       }
     }).addTo(map);
   });
