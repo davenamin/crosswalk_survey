@@ -8,6 +8,10 @@ import requests
 import flask
 from pymemcache.client.base import Client
 
+# sanity for testing: avoid using memcached for local dev
+is_testing = False
+
+
 kobo_url = "https://kc.kobotoolbox.org/api/v1/data/"
 
 # important things, passed by environment variable (not secure, sorry!)
@@ -23,11 +27,14 @@ backend = Client((backend_url, int(backend_port)))
 
 
 # let's not hit the kobo API about a billion times, right?
-data_stale_timeout = 10  # seconds
+data_stale_timeout = 30  # seconds
 
 
 # fetch and/or update the latest survey data
 def fetch():
+    if is_testing:
+        r = requests.get(kobo_url + kobo_form_id, auth=(user_str, pass_str))
+        return r.text
     data_cache = backend.get('data')
     if data_cache is None:
         r = requests.get(kobo_url + kobo_form_id, auth=(user_str, pass_str))
@@ -38,12 +45,13 @@ def fetch():
 
 # convert a kobo form entry to a geojson feature
 def convert_kobo_to_geo(kobo):
-    print(kobo.keys())
     return {"type": "Feature",
             "id": kobo['_id'],
             "geometry": {
-                "type": "Point",
-                "coordinates": [kobo['_geolocation'][1], kobo['_geolocation'][0]]
+                "type": "LineString",
+                "coordinates": [[pt[1], pt[0]]
+                                for pt in [pt.split()
+                                           for pt in kobo['Which_way_does_it_go'].split(";")]]
                 },
             "properties": {
                 "signal": kobo.get('Is_there_a_pedestrian_crossing_signal', None),
