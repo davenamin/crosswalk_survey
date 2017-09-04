@@ -19,7 +19,7 @@ app = flask.Flask(__name__)
 
 # was wishing this could live in just python...
 backend_url, backend_port = (os.environ['MEMCACHED_URL']).replace("memcached://", "").split(":")
-backend = Client((backend_url, backend_port))
+backend = Client((backend_url, int(backend_port)))
 
 
 # let's not hit the kobo API about a billion times, right?
