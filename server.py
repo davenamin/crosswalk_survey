@@ -64,3 +64,7 @@ def geojson():
 @app.route("/")
 def main():
     return flask.render_template('map.html')
+
+
+if __name__ == '__main__':
+    app.run()
