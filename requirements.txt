@@ -7,7 +7,7 @@ idna==2.6
 itsdangerous==0.24
 Jinja2==2.9.6
 MarkupSafe==1.0
-python3-memcached==1.51
+pymemcache==1.4.3
 requests==2.18.4
 six==1.10.0
 urllib3==1.22

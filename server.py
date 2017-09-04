@@ -6,7 +6,7 @@ import os
 import json
 import requests
 import flask
-import memcache
+from pymemcache.client.base import Client
 
 kobo_url = "https://kc.kobotoolbox.org/api/v1/data/"
 
@@ -18,7 +18,9 @@ pass_str = os.environ['KOBO_PASS']  # ok, i know, i know...
 app = flask.Flask(__name__)
 
 # was wishing this could live in just python...
-backend = memcache.Client((os.environ['MEMCACHED_URL']).replace(r"memcached://", "", 1))  # ultra kludge
+backend_url, backend_port = (os.environ['MEMCACHED_URL']).replace("memcached://", "").split(":")
+backend = Client((backend_url, backend_port))
+
 
 # let's not hit the kobo API about a billion times, right?
 data_stale_timeout = 10  # seconds
@@ -29,7 +31,7 @@ def fetch():
     data_cache = backend.get('data')
     if data_cache is None:
         r = requests.get(kobo_url + kobo_form_id, auth=(user_str, pass_str))
-        backend.set('data', r.text, time=data_stale_timeout)
+        backend.set('data', r.text, expire=data_stale_timeout, noreply=False)
         data_cache = backend.get('data')
     return data_cache
 
