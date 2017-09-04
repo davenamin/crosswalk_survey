@@ -18,7 +18,7 @@ pass_str = os.environ['KOBO_PASS']  # ok, i know, i know...
 app = flask.Flask(__name__)
 
 # was wishing this could live in just python...
-backend = memcache.Client(os.environ['MEMCACHED_URL'])
+backend = memcache.Client((os.environ['MEMCACHED_URL']).replace(r"memcached://", "", 1))  # ultra kludge
 
 # let's not hit the kobo API about a billion times, right?
 data_stale_timeout = 10  # seconds
