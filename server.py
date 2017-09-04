@@ -23,7 +23,7 @@ backend = Client((backend_url, int(backend_port)))
 
 
 # let's not hit the kobo API about a billion times, right?
-data_stale_timeout = 10  # seconds
+data_stale_timeout = 30  # seconds
 
 
 # fetch and/or update the latest survey data
@@ -42,8 +42,10 @@ def convert_kobo_to_geo(kobo):
     return {"type": "Feature",
             "id": kobo['_id'],
             "geometry": {
-                "type": "Point",
-                "coordinates": [kobo['_geolocation'][1], kobo['_geolocation'][0]]
+                "type": "LineString",
+                "coordinates": [[pt_split[1],pt_split[0]]
+                                for pt in kobo['Which_way_does_it_go'].split(";")
+                                for pt_split in pt.split(" ")]
                 },
             "properties": {
                 "signal": kobo.get('Is_there_a_pedestrian_crossing_signal', None),
