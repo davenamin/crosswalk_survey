@@ -37,7 +37,7 @@ def fetch():
     data_cache = backend.get('data')
     if data_cache is None:
         r = requests.get(kobo_url + kobo_form_id, auth=(user_str, pass_str))
-        backend.set('data', r.text, ex=data_stale_timeout, noreply=False)
+        backend.set('data', r.text, ex=data_stale_timeout)
         data_cache = backend.get('data')
     return data_cache
 
