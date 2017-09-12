@@ -6,7 +6,7 @@ import os
 import json
 import requests
 import flask
-from pymemcache.client.base import Client
+import redis
 
 # sanity for testing: avoid using memcached for local dev
 is_testing = False
@@ -22,8 +22,8 @@ pass_str = os.environ['KOBO_PASS']  # ok, i know, i know...
 app = flask.Flask(__name__)
 
 # was wishing this could live in just python...
-backend_url, backend_port = (os.environ['MEMCACHED_URL']).replace("memcached://", "").split(":")
-backend = Client((backend_url, int(backend_port)))
+backend_url, backend_port = (os.environ['REDIS_URL']).replace("redis://", "").split(":")
+backend = redis.StrictRedis(host=backend_url, port=int(backend_port))
 
 
 # let's not hit the kobo API about a billion times, right?
@@ -38,7 +38,7 @@ def fetch():
     data_cache = backend.get('data')
     if data_cache is None:
         r = requests.get(kobo_url + kobo_form_id, auth=(user_str, pass_str))
-        backend.set('data', r.text, expire=data_stale_timeout, noreply=False)
+        backend.set('data', r.text, ex=data_stale_timeout, noreply=False)
         data_cache = backend.get('data')
     return data_cache
 
