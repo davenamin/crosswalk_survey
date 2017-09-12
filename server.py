@@ -22,8 +22,7 @@ pass_str = os.environ['KOBO_PASS']  # ok, i know, i know...
 app = flask.Flask(__name__)
 
 # was wishing this could live in just python...
-backend_url, backend_port = (os.environ['REDIS_URL']).replace("redis://", "").split(":")
-backend = redis.StrictRedis(host=backend_url, port=int(backend_port))
+backend = redis.StrictRedis.from_url(os.environ['REDIS_URL'])
 
 
 # let's not hit the kobo API about a billion times, right?
